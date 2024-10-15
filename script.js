@@ -25,14 +25,24 @@ document.addEventListener('DOMContentLoaded', () => {
         let funnyText = '';
 
         if (attendancePercentage >= expectedPercentage) {
-            const classesCanBunk = Math.floor(presentClasses - (expectedPercentage / 100 * totalClasses));
-            classesToBunk.textContent = `You can bunk ${classesCanBunk} more class${classesCanBunk !== 1 ? 'es' : ''} and still maintain ${expectedPercentage}% attendance.`;
+            let maxBunkableClasses = 0;
+            let newTotal = totalClasses;
+            
+            while ((presentClasses / newTotal) * 100 >= expectedPercentage) {
+                maxBunkableClasses++;
+                newTotal++;
+            }
+            maxBunkableClasses--; // Adjust for the last increment that broke the condition
+
+            classesToBunk.textContent = `You can bunk ${maxBunkableClasses} more class${maxBunkableClasses !== 1 ? 'es' : ''} and still maintain ${expectedPercentage}% attendance.`;
             classesToAttend.textContent = '';
 
-            if (classesCanBunk > 5) {
-                funnyText = "Party time! You're killing it! 🎉";
-            } else if (classesCanBunk > 0) {
-                funnyText = "Nice! A few days off won't hurt. 😎";
+            if (maxBunkableClasses > 10) {
+                funnyText = "Woohoo! Time for a vacation! Just don't forget where the campus is. 🏖️😎";
+            } else if (maxBunkableClasses > 5) {
+                funnyText = "Nice! A few days off won't hurt. Maybe learn a TikTok dance? 💃🕺";
+            } else if (maxBunkableClasses > 0) {
+                funnyText = "You've got some wiggle room. Use it wisely, young Padawan! 🧘‍♂️";
             } else {
                 funnyText = "Phew! You're just making it. Stay sharp! 😅";
             }
