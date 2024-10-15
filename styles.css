@@ -70,3 +70,12 @@ button:hover {
 .hidden {
     display: none;
 }
+
+.funny-message {
+    font-weight: bold;
+    font-style: italic;
+    color: #ff6600;
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 1.1em;
+}
