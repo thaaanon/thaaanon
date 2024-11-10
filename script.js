@@ -6,74 +6,97 @@ document.addEventListener('DOMContentLoaded', () => {
     const classesToAttend = document.getElementById('classesToAttend');
     const funnyMessage = document.getElementById('funnyMessage');
 
+    // Add input event listeners to force decimal precision
+    ['presentClasses', 'totalClasses', 'expectedPercentage'].forEach(id => {
+        const input = document.getElementById(id);
+        input.addEventListener('input', (e) => {
+            // Ensure value maintains decimals
+            if (e.target.value.includes('.')) {
+                const [whole, decimal] = e.target.value.split('.');
+                e.target.value = `${whole}.${decimal.slice(0, 2)}`;
+            }
+        });
+    });
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const presentClasses = parseFloat(document.getElementById('presentClasses').value);
-        const totalClasses = parseFloat(document.getElementById('totalClasses').value);
-        const expectedPercentage = parseFloat(document.getElementById('expectedPercentage').value);
+        // Force decimal parsing with parseFloat and toFixed
+        const presentClasses = Number(document.getElementById('presentClasses').value).toFixed(2);
+        const totalClasses = Number(document.getElementById('totalClasses').value).toFixed(2);
+        const expectedPercentage = Number(document.getElementById('expectedPercentage').value).toFixed(2);
+
+        // Convert back to numbers for calculations
+        const presentNum = Number(presentClasses);
+        const totalNum = Number(totalClasses);
+        const expectedNum = Number(expectedPercentage);
 
         // Input validation
-        if (presentClasses > totalClasses) {
+        if (presentNum > totalNum) {
             alert("Present classes cannot be more than total classes!");
             return;
         }
 
-        if (isNaN(presentClasses) || isNaN(totalClasses) || isNaN(expectedPercentage)) {
+        if (isNaN(presentNum) || isNaN(totalNum) || isNaN(expectedNum)) {
             alert("Please enter valid numbers!");
             return;
         }
 
-        const attendancePercentage = (presentClasses / totalClasses) * 100;
+        // Calculate with high precision
+        const attendancePercentage = (presentNum / totalNum * 100);
         currentPercentage.textContent = `Current attendance percentage: ${attendancePercentage.toFixed(2)}%`;
 
         let funnyText = '';
 
-        if (Math.abs(attendancePercentage - expectedPercentage) < 0.01) {
+        // Use precise comparison
+        if (Math.abs(attendancePercentage - expectedNum) < 0.01) {
             funnyText = "Perfect balance! Thanos would be proud! 👌✨";
             classesToBunk.textContent = "You're exactly at your target percentage!";
             classesToAttend.textContent = "";
-        } else if (attendancePercentage >= expectedPercentage) {
+        } else if (attendancePercentage >= expectedNum) {
             let maxBunkableClasses = 0;
-            let newTotal = totalClasses;
+            let newTotal = totalNum;
             
-            while (((presentClasses / newTotal) * 100) >= expectedPercentage) {
+            // Use precise decimal comparison
+            while ((Number((presentNum / newTotal * 100).toFixed(2))) >= expectedNum) {
                 maxBunkableClasses++;
                 newTotal++;
             }
             maxBunkableClasses--; // Adjust for the last increment
 
-            classesToBunk.textContent = `You can bunk ${maxBunkableClasses} more class${maxBunkableClasses !== 1 ? 'es' : ''} and still maintain ${expectedPercentage}% attendance.`;
+            classesToBunk.textContent = `You can bunk ${maxBunkableClasses} more class${maxBunkableClasses !== 1 ? 'es' : ''} and still maintain ${expectedNum}% attendance.`;
             classesToAttend.textContent = '';
 
-            // Funny messages for good attendance
-            if (attendancePercentage - expectedPercentage >= 20) {
+            // Funny messages based on precise percentage difference
+            const difference = Number((attendancePercentage - expectedNum).toFixed(2));
+            if (difference >= 20) {
                 funnyText = "You're so regular, the classroom furniture thinks you're part of the inventory! 🪑😂";
-            } else if (attendancePercentage - expectedPercentage >= 15) {
+            } else if (difference >= 15) {
                 funnyText = "Your attendance is higher than my phone's battery ever gets! 🔋💯";
-            } else if (attendancePercentage - expectedPercentage >= 10) {
+            } else if (difference >= 10) {
                 funnyText = "Time to write a book: 'The Art of Professional Class Bunking' - you're qualified! 📚😎";
-            } else if (attendancePercentage - expectedPercentage >= 5) {
+            } else if (difference >= 5) {
                 funnyText = "You've got enough buffer to start your own mini-vacation! 🏖️🎉";
             } else {
                 funnyText = "Looking good! But remember, attendance is like pizza - more is better! 🍕";
             }
         } else {
             let additionalClasses = 0;
-            let newTotal = totalClasses;
-            let newPresent = presentClasses;
+            let newTotal = totalNum;
+            let newPresent = presentNum;
             
-            while (((newPresent / newTotal) * 100) < expectedPercentage) {
+            // Use precise decimal comparison
+            while (Number((newPresent / newTotal * 100).toFixed(2)) < expectedNum) {
                 newTotal++;
                 newPresent++;
                 additionalClasses++;
             }
 
             classesToBunk.textContent = '';
-            classesToAttend.textContent = `You need to attend ${additionalClasses} more class${additionalClasses !== 1 ? 'es' : ''} to reach ${expectedPercentage}% attendance.`;
+            classesToAttend.textContent = `You need to attend ${additionalClasses} more class${additionalClasses !== 1 ? 'es' : ''} to reach ${expectedNum}% attendance.`;
 
-            // Funny messages for low attendance
-            const deficit = expectedPercentage - attendancePercentage;
+            // Funny messages based on precise percentage difference
+            const deficit = Number((expectedNum - attendancePercentage).toFixed(2));
             if (deficit >= 20) {
                 funnyText = "Your attendance is so low, even your shadow has stopped following you to class! 👻📚";
             } else if (deficit >= 15) {
